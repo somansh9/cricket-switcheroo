@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cricket Switcheroo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏏</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--ink:#1c1b19;--mut:#6b675e;--acc:#2f7d4f;--bad:#c0392b;--sub:#fff0b8;--let:#d6e6ff;--wild:#e6d7ff;--line:#d9d5ca;--edge:#8a8578;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171815;--card:#23241f;--ink:#f1efe8;--mut:#a09b8e;--acc:#5fc287;--bad:#ef6a5b;--sub:#4a4220;--let:#233449;--wild:#3d2d57;--line:#3a3b34;--edge:#8d897c}}
+:root[data-theme="dark"]{--bg:#171815;--card:#23241f;--ink:#f1efe8;--mut:#a09b8e;--acc:#5fc287;--bad:#ef6a5b;--sub:#4a4220;--let:#233449;--wild:#3d2d57;--line:#3a3b34;--edge:#8d897c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.4 "EB Garamond",Garamond,"Times New Roman",serif}
+body.lobby{background:#b04f77;color:#fff;--ink:#1c1b19;--mut:#f4dce7;--card:#fff;--line:#8c3a5c;--acc:#7a2d4f;--bad:#7a2d4f}
+body.lobby .err{color:#ffe3a3}
+#app{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:30px;margin:8px 0 4px}
+.mut{color:var(--mut)}
+input,button,select{font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px 12px;background:var(--card);color:var(--ink)}
+input,select{width:100%;box-sizing:border-box;margin:6px 0}
+label{display:block;margin-top:14px;font-weight:600}
+button{cursor:pointer}
+button.p{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600}
+button.d{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px}
+.table{display:flex;gap:14px;justify-content:center;margin:12px 0}
+.c{border-radius:10px;border:1.5px solid var(--edge);box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.S{background:var(--sub)}.L{background:var(--let)}.W{background:var(--wild)}
+.big{width:140px;height:190px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center}
+.big b{font-size:64px;line-height:1.05}.big span{font-size:18px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.big small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:6px}
+.hand{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.hand button{width:94px;height:136px;padding:7px 5px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;font-size:13px;line-height:1.15;overflow:hidden;overflow-wrap:anywhere}
+.hand button b{font-size:32px;line-height:1}
+.hand small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:4px}
+.hand .W span{font-weight:700;font-size:16px}
+.hand button.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.msg{text-align:center;min-height:22px;margin:6px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+.err{color:var(--bad);min-height:20px;font-size:16px}
+.code{font-size:36px;font-weight:700;letter-spacing:.2em;text-align:center}
+#uw{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:6px}
+#uw .ul{width:190px;max-height:50vh;overflow:auto;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+#uw .ul div{margin:2px 0}
+@media (min-width:900px){#uw{top:96px;bottom:auto;flex-direction:column}#uw .ul{max-height:70vh}}
+</style></head>
+<body><div id="app"><p class="mut">Connecting…</p></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// ===== PASTE YOUR FIREBASE CONFIG HERE (see setup steps) =====
+const firebaseConfig={
+apiKey: "AIzaSyDetNe_rxSH7oIVC6_FeQU4Lva8I7F0muc",
+  authDomain: "cricket-swit.firebaseapp.com",
+  databaseURL: "https://cricket-swit-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cricket-swit"
+};
+// =============================================================
+const SUBJ=["6,000+ Test runs","300+ Test wickets","A Test triple century","A Test hundred and a Test five-for","100+ Tests played","A Test hat-trick","A five-for on Test debut","Test batting average over 50 (3,000+ runs)","Test bowling average under 25 (100+ wickets)","2,000+ Test runs and 200+ Test wickets","A wicketkeeper with a Test hundred","An opener with 5,000+ Test runs","A left-arm spinner with 100+ Test wickets","Captained their country in 20+ Tests","7,000+ ODI runs","250+ ODI wickets","3,000+ ODI runs and 100+ ODI wickets","ODI batting average over 45 (3,000+ runs)","An ODI hat-trick","An ODI double century","3,000+ T20I runs","100+ T20I wickets","A T20I hundred","A five-wicket haul in a T20I","A wicketkeeper with 3,000+ ODI runs","A hundred in Tests, ODIs and T20Is","A woman with 100+ ODI caps","Played international cricket for two countries","A hundred in an ODI World Cup knockout match","A fifty in an ODI World Cup semi-final","A fifty in an ODI World Cup final","A fifty in a T20 World Cup semi-final","A fifty in a T20 World Cup final","A five-wicket haul at an ODI World Cup","A hat-trick at a World Cup (ODI or T20)","A century at a T20 World Cup","Player of the Match in a World Cup final","Player of the Tournament at a World Cup","Captained a World Cup-winning team (ODI or T20)","Captained a team in a T20 World Cup final","Played in a 2022 World Cup final (men’s or women’s)","Played in a 2023 World Cup final (men’s or women’s)","Played in a 2024 World Cup final (men’s or women’s)","Played in a World Test Championship final","Won an ICC Cricketer of the Year award","Won the IPL Orange Cap or Purple Cap","A Wisden Cricketer of the Year, 2014 to 2024","Non-Australian with a Test five-for in Australia","Non-Indian with a Test hundred in India","Non-South African with a Test five-for in South Africa","Non-Sri Lankan with a Test hundred in Sri Lanka","Non-West Indian with a Test hundred in the Caribbean","Non-New Zealander with a Test five-for in New Zealand","An English batter with a Test hundred in Australia","An Indian with a Test hundred in England","A Test double century","A Test hundred on debut","8,000+ Test runs","A ten-wicket haul in a Test match","A fast bowler with 200+ Test wickets","A spinner with 200+ Test wickets","A left-handed batter with 6,000+ Test runs","A Test hundred and 100+ Test wickets","10+ ODI hundreds","200+ ODIs played","A hundred at an ODI World Cup","2,000+ T20I runs","75+ T20I wickets","A Pakistani with a Test hundred","A Sri Lankan with a Test hundred","A New Zealander with a Test hundred","A South African with a Test hundred","A West Indian with a Test hundred","A Pakistani with a Test five-for","Non-Australian with a Test hundred in Australia","Non-English bowler with a Test five-for in England","An ICC Hall of Fame inductee","Played in the 2005 Ashes","An IPL hundred","An IPL five-wicket haul","A left-handed batter with a Test hundred in England","A left-handed batter with a Test hundred in Australia","A left-handed batter with a Test hundred in India","A right-handed batter with a Test hundred in the West Indies","A right-handed batter with a Test hundred in New Zealand","A left-arm bowler with a Test five-for in England","A left-arm bowler with a Test five-for in Australia","A left-arm spinner with a Test five-for in India","A right-arm spinner with a Test five-for in England","A right-arm seam bowler with a Test five-for in India"];
+const LET="AAAAAAAAAAAABBBBBBCCCCCCCDDDDDDDEEEEFFFGGGGGHHHHHIIIJJJJJJJJJKKKKKKKKLLLLLMMMMMMMMMMMMMMMNNNNNOOPPPPPQRRRRRRRRRSSSSSSSSSSSSSSTTTTTUUVVWWWYYZZ";
+const TIME=30;
+const WN={EXTRA:"Extra Turn",TIME:"More Time",SWITCH:"Big Switch"};
+const WD={EXTRA:"Extra Turn: play two cards this turn.",TIME:"More Time: you get double the time for this card.",SWITCH:"Big Switch: swap hands with your opponent. Your turn then ends."};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ss={get:k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{sessionStorage.setItem(k,v)}catch(e){}}};
+let db,ref,G=null,code="",me=ss.get("sw_id")||(Math.random().toString(36).slice(2)+Date.now().toString(36));ss.set("sw_id",me);
+let sel=-1,word="",err="",name=ss.get("sw_name")||"",unsub=null,sentTO=0,setTime=TIME,setHand=10,showUsed=false,startKey="";
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function seat(){return !G?null:G.ids.a===me?"a":G.ids.b===me?"b":null}
+const other=s=>s==="a"?"b":"a";
+function fresh(n=10){
+  const d=shuffle([...SUBJ.map(v=>({t:"S",v})),...LET.split("").map(v=>({t:"L",v})),...["EXTRA","EXTRA","TIME","TIME","SWITCH"].map(v=>({t:"W",v}))]);
+  const s=d.splice(d.findIndex(c=>c.t==="S"),1)[0],l=d.splice(d.findIndex(c=>c.t==="L"),1)[0];
+  return {names:{a:name,b:""},ids:{a:me,b:""},hands:{a:d.splice(0,n),b:d.splice(0,n)},deck:d,subj:s.v,letter:l.v,used:[],usedD:[],turn:"a",phase:"wait",pending:null,turnStart:Date.now(),winner:"",msg:"",plays:1,limit:TIME,wild:false,score:{a:0,b:0},round:1,first:"a"};
+}
+async function save(g){try{await ref.set(g)}catch(e){err="Couldn’t save: "+(e.message||e.code||"error");draw()}}
+function norm(g){if(!g)return null;g.used=g.used||[];g.usedD=g.usedD||[];g.deck=g.deck||[];g.hands=g.hands||{};g.hands.a=g.hands.a||[];g.hands.b=g.hands.b||[];return g}
+function watch(c){
+  code=c;ss.set("sw_code",c);ref=db.ref("cricket/"+c);
+  if(unsub)unsub();
+  const h=s=>{G=norm(s.val());
+    if(G&&!seat()&&G.ids.b===""&&G.phase==="wait"){const g=structuredClone(G);g.ids.b=me;g.names.b=name||"Player 2";g.phase="setup";save(g);return}
+    if(G&&G.phase!=="ready")startKey="";
+    if(G&&G.phase==="ready"&&G.ready&&G.ready.a&&G.ready.b&&seat()==="a"&&startKey!==code){startKey=code;startGame();return}
+    draw()};
+  ref.on("value",h,e=>{err="Couldn’t load game";draw()});unsub=()=>ref.off("value",h);
+}
+function create(){name=$("#nm").value.trim()||"Player 1";ss.set("sw_name",name);const c=Math.random().toString(36).slice(2,6).toUpperCase();ref=db.ref("cricket/"+c);ref.set(fresh()).then(()=>watch(c)).catch(e=>{err="Couldn’t create game: "+(e.message||e.code);draw()})}
+function join(){name=$("#nm").value.trim()||"Player 2";ss.set("sw_name",name);const c=$("#cd").value.trim().toUpperCase();if(c.length<4){err="Enter the 4-letter code";draw();return}
+  db.ref("cricket/"+c).once("value").then(s=>{if(!s.exists()){err="No game with that code";draw()}else{err="";watch(c)}}).catch(e=>{err="Couldn’t join";draw()})}
+function leave(){if(unsub)unsub();unsub=null;G=null;ss.set("sw_code","");err="";draw()}
+
+const nn=w=>String(w||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/['’`]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+const nkey=n=>{const p=n.split(" ");return p[0][0]+" "+p[p.length-1]};
+function submit(){
+  const s=seat(),c=G.hands[s][sel];if(!c)return;
+  if(c.t==="W")return wild(s,c);
+  const w=word.trim(),n=nn(w);
+  const need=(c.t==="L"?c.v:G.letter).toLowerCase();
+  if(!n){err="Type the player’s full name first";return draw()}
+  if(n[0]!==need){err="The first name must start with "+need.toUpperCase();return draw()}
+  if(n.split(" ").length<2){err="Type the full name (first and last), like Virat Kohli";return draw()}
+  if(G.used.includes(n)){err="“"+w+"” was already used";return draw()}
+  const k=nkey(n),sim=G.used.map((u,i)=>nkey(u)===k?(G.usedD[i]||u):null).filter(Boolean);
+  const g=structuredClone(G);g.phase="judge";g.pending={card:c,word:w,norm:n,sim:sim};err="";sel=-1;word="";save(g);
+}
+function draw1(g,s){const c=g.deck.pop();if(c)g.hands[s].push(c);return !!c}
+function judge(ok){
+  const g=structuredClone(G),s=g.turn,p=g.pending,H=g.hands[s];
+  const i=H.findIndex(c=>c.t===p.card.t&&c.v===p.card.v);
+  if(ok&&i>=0){
+    H.splice(i,1);g.used.push(p.norm);g.usedD.push(p.word);
+    if(p.card.t==="L")g.letter=p.card.v;else g.subj=p.card.v;
+    g.msg=g.names[s]+" played “"+p.word+"”. Accepted!";
+    if(!H.length){finish(g,s);return save(g)}}else{
+    const d=draw1(g,s);g.msg=g.names[s]+"’s “"+p.word+"” was rejected"+(d?" and they draw a card.":".");
+  }
+  g.pending=null;g.phase="play";advance(g);save(g);
+}
+function timeout(){
+  const g=structuredClone(G),s=g.turn;draw1(g,s);
+  g.msg=g.names[s]+" ran out of time and draws a card.";advance(g);save(g);
+}
+function startGame(){
+  const g=fresh(G.hs||10);g.names=G.names;g.ids=G.ids;g.base=G.base||TIME;g.limit=g.base;g.hs=G.hs||10;
+  g.phase="play";g.turnStart=Date.now();g.msg="Game on! "+g.names.a+" goes first.";save(g);
+}
+function finish(g,w){g.phase="over";g.winner=w;g.pending=null;g.score=g.score||{a:0,b:0};g.score[w]=(g.score[w]||0)+1}
+function rematch(){
+  if(G.phase!=="over")return;
+  const g=fresh(G.hs||10);g.names=G.names;g.ids=G.ids;g.base=G.base;g.limit=G.base||TIME;g.hs=G.hs;
+  g.score=G.score;g.round=(G.round||1)+1;g.turn=other(G.first||"a");g.first=g.turn;
+  g.phase="play";g.turnStart=Date.now();g.msg="Game "+g.round+"! "+g.names[g.turn]+" goes first.";save(g);
+}
+function scoreLine(){const sc=G.score||{a:0,b:0};return '<div class="msg mut" style="margin:0 0 4px">Game '+(G.round||1)+' · '+esc(G.names.a)+' '+(sc.a||0)+' – '+(sc.b||0)+' '+esc(G.names.b)+"</div>"}
+async function patch(o){try{await ref.update(o)}catch(e){err="Couldn’t save: "+(e.message||e.code||"error");draw()}}
+function toReady(){patch({phase:"ready",base:setTime,hs:setHand,ready:{a:false,b:false}})}
+function imReady(){const s=seat();if(s)ref.child("ready/"+s).set(true).catch(e=>{err="Couldn’t save: "+(e.message||e.code||"error");draw()})}
+function changeRules(){patch({phase:"setup",ready:{a:false,b:false}})}
+function simHTML(p){return p&&p.sim&&p.sim.length?'<div style="margin-top:8px;color:var(--bad)">Heads up: similar to '+p.sim.map(x=>"“"+esc(x)+"”").join(", ")+', already used.</div>':""}
+function usedHTML(){const L=G.usedD||[];return '<div id="uw"><button id="un" style="padding:6px 12px;font-size:15px">Used names ('+L.length+(showUsed?") ▼":") ▲")+"</button>"+(showUsed?'<div class="ul">'+(L.length?L.map(x=>"<div>"+esc(x)+"</div>").join(""):"None yet.")+"</div>":"")+"</div>"}
+function advance(g){
+  const cur=g.turn;g.plays=(g.plays||1)-1;g.limit=g.base||TIME;g.turnStart=Date.now();
+  if(g.plays<=0){g.turn=other(cur);g.plays=1;g.wild=false}
+  else g.msg+=" "+g.names[cur]+" plays again.";
+}
+function wild(s,c){
+  if(G.wild){err="Only one Wild Card per turn";return draw()}
+  const g=structuredClone(G),o=other(s),n=g.names[s];
+  g.hands[s].splice(sel,1);g.wild=true;g.turnStart=Date.now();err="";sel=-1;word="";
+  if(c.v==="EXTRA"){g.plays=2;g.msg=n+" played Extra Turn and gets two cards this turn."}
+  else if(c.v==="TIME"){const b=g.base||TIME;g.limit=(g.limit||b)+b;g.turnStart=G.turnStart;g.msg=n+" played More Time: +"+b+" seconds."}
+  else{[g.hands[s],g.hands[o]]=[g.hands[o],g.hands[s]];g.msg=n+" played the Big Switch and swapped hands!";g.turn=o;g.plays=1;g.wild=false;g.limit=g.base||TIME}
+  for(const x of["a","b"])if(!g.hands[x].length&&g.phase!=="over"){finish(g,x)}
+  save(g);
+}
+function hint(){const c=G.hands[seat()][sel];return c&&c.t==="W"?"<br><b>"+WD[c.v]+"</b> No word needed, just press Play.<br>":""}
+function handHTML(s,active){
+  return '<div class="hand">'+G.hands[s].map((c,i)=>'<button class="c '+c.t+(i===sel?" sel":"")+'" data-i="'+i+'"'+(active?"":" disabled")+'>'+(c.t==="L"?"<b>"+c.v+"</b>":c.t==="W"?"<small>Wild</small><span>"+WN[c.v]+"</span>":esc(c.v))+'</button>').join("")+"</div>";
+}
+function draw(){
+  const a=$("#app");document.body.classList.toggle("lobby",!G||G.phase==="wait"||G.phase==="setup"||G.phase==="ready");if(G&&seat()&&sel>=G.hands[seat()].length)sel=-1;
+  if(!G){
+    a.innerHTML='<h1 style="text-align:center">🏏Cricket Switcheroo🏏</h1>'
+    +'<input id="nm" placeholder="Your name" value="'+esc(name)+'" maxlength="16">'
+    +'<button class="p" id="mk" style="width:100%;margin:6px 0">Create a new game</button>'
+    +'<p class="mut" style="text-align:center">or join a game</p><div class="row"><input id="cd" placeholder="Code" maxlength="4" style="text-transform:uppercase"><button id="jn">Join</button></div><div class="err">'+esc(err)+"</div>";
+    $("#mk").onclick=create;$("#jn").onclick=join;return;
+  }
+  const s=seat();
+  if(!s){a.innerHTML='<p>This game already has two players.</p><button id="lv">Back</button>';$("#lv").onclick=leave;return}
+  if(G.phase==="wait"){a.innerHTML='<h1>Waiting for your friend…</h1><p class="mut">Tell them to open this page and join with the code:</p><div class="code">'+esc(code)+'</div>';return}
+  if(G.phase==="setup"){
+    const opt=(l,v,u)=>l.map(x=>'<option value="'+x+'"'+(x===v?" selected":"")+'>'+x+u+'</option>').join("");
+    if(s==="a"){
+      a.innerHTML='<h1>'+esc(G.names.b)+' joined!</h1><p class="mut">Choose the rules, then start the game.</p>'
+      +'<label for="st">Time per move</label><select id="st">'+opt([20,25,30,35,40,45],setTime," seconds")+'</select>'
+      +'<label for="sh">Cards in each starting hand</label><select id="sh">'+opt([5,7,10,12,15],setHand," cards")+'</select>'
+      +'<button class="p" id="sg" style="width:100%;margin-top:16px">Continue</button><div class="err">'+esc(err)+"</div>";
+      $("#st").onchange=e=>{setTime=+e.target.value};$("#sh").onchange=e=>{setHand=+e.target.value};$("#sg").onclick=toReady;
+    }else a.innerHTML='<h1>'+esc(G.names.a)+' is setting up the game…</h1><p class="mut">You’ll both see the rules next.</p>';
+    return;
+  }
+  if(G.phase==="ready"){
+    const R=G.ready||{},op=other(s);
+    a.innerHTML='<h1 style="text-align:center">Ready to play?</h1>'
+    +'<div class="box" style="color:var(--ink);text-align:center"><b>Rules</b><br>Time per move: <b>'+(G.base||TIME)+' seconds</b><br>Cards in each hand: <b>'+(G.hs||10)+'</b></div>'
+    +'<p style="text-align:center">You: <b>'+(R[s]?"ready ✓":"not ready")+'</b> · '+esc(G.names[op])+': <b>'+(R[op]?"ready ✓":"not ready")+'</b></p>'
+    +'<button class="p" id="rd" style="width:100%"'+(R[s]?" disabled":"")+'>'+(R[s]?"Waiting for "+esc(G.names[op])+"…":"I’m ready")+'</button>'
+    +(s==="a"?'<button id="cr" style="width:100%;margin-top:8px">Change rules</button>':"")+'<div class="err">'+esc(err)+"</div>";
+    $("#rd").onclick=imReady;if($("#cr"))$("#cr").onclick=changeRules;
+    return;
+  }
+  const o=other(s),mine=G.turn===s,opp=G.names[o];
+  let h='<div class="bar"><span>Game <b>'+esc(code)+'</b></span><span>'+esc(opp)+": "+G.hands[o].length+' cards</span><span id="tm"></span></div>';
+  h+=scoreLine();const pd=G.phase==="judge"?G.pending:null;
+  const subj=pd&&pd.card.t==="S"?pd.card.v:G.subj,let_=pd&&pd.card.t==="L"?pd.card.v:G.letter;
+  h+='<div class="table"><div class="c S big"><small>Subject</small><span>'+esc(subj)+'</span></div><div class="c L big"><small>Letter</small><b>'+let_+"</b></div></div>";
+  if(pd)h+='<p class="msg mut">Proposed by '+esc(G.names[G.turn])+" — not yet accepted</p>";
+  else h+='<p class="msg mut">'+esc(G.msg)+"</p>";
+  if(G.phase==="over"){
+    h+='<div class="box" style="text-align:center"><h2>'+(G.winner===s?"🎉 You win!":esc(G.names[G.winner])+" wins")+'</h2><div class="row"><button class="p" id="rm">Play again</button><button id="lv">Leave room</button></div></div>';
+  }else if(G.phase==="judge"){
+    if(mine)h+='<div class="box">Waiting for '+esc(opp)+' to agree on “'+esc(pd.word)+"”…</div>";
+    else h+='<div class="box"><b>'+esc(opp)+' says “'+esc(pd.word)+'”</b><br>Does this player fit <i>'+esc(subj)+"</i>, with a first name starting with <b>"+let_+'</b>?'+simHTML(pd)+'<div class="row" style="margin-top:10px"><button class="p" id="ag">Agree</button><button class="d" id="dg">Disagree</button></div></div>';
+  }else if(mine){
+    h+='<div class="box"><b>Your turn.</b>'+(G.plays>1?" <i>Extra Turn: "+G.plays+" cards to play.</i>":"")+' Play a letter card to name a player who fits the subject, or a subject card to name a player whose first name starts with <b>'+G.letter+'</b>. Type their full name.'+hint()+'<input id="wd" placeholder="Player’s full name" value="'+esc(word)+'" autocomplete="off"><button class="p" id="go" style="width:100%">Play selected card</button><div class="err">'+esc(err)+"</div></div>";
+  }else h+='<div class="box">Waiting for '+esc(opp)+"…</div>";
+  if(G.phase==="play")h+='<div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,mine);
+  else if(G.phase==="judge")h+='<div style="position:relative"><div style="visibility:hidden"><div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,false)+'</div><div class="mut" style="position:absolute;inset:0;text-align:center;padding-top:8px">Hands are hidden while the name is checked.<br>They come back when the next turn starts.</div></div>';
+  h+=usedHTML()+'<div style="height:52px"></div>';
+  a.innerHTML=h;
+  a.querySelectorAll(".hand button").forEach(b=>b.onclick=()=>{sel=+b.dataset.i;err="";draw();const w=$("#wd");if(w)w.focus()});
+  const wd=$("#wd");if(wd){wd.oninput=()=>word=wd.value;wd.onkeydown=e=>{if(e.key==="Enter")$("#go").click()}}
+  if($("#go"))$("#go").onclick=()=>{if(sel<0){err="Pick a card first";return draw()}submit()};
+  if($("#ag"))$("#ag").onclick=()=>judge(true);
+  if($("#dg"))$("#dg").onclick=()=>judge(false);
+  if($("#lv"))$("#lv").onclick=leave;
+  if($("#rm"))$("#rm").onclick=rematch;
+  if($("#un"))$("#un").onclick=()=>{showUsed=!showUsed;draw()};
+}
+setInterval(()=>{
+  const t=$("#tm");if(!G||G.phase!=="play"){if(t)t.textContent="";return}
+  const left=(G.limit||TIME)-(Date.now()-G.turnStart)/1000;
+  if(t)t.textContent="⏱ "+Math.max(0,Math.ceil(left))+"s";
+  if(left<-2&&seat()&&seat()!==G.turn&&sentTO!==G.turnStart){sentTO=G.turnStart;timeout()}
+},250);
+(function(){
+  if(!firebaseConfig.apiKey||firebaseConfig.apiKey.startsWith("PASTE")){$("#app").innerHTML="<h1>Almost there</h1><p>Open this file and paste your Firebase config at the top of the script.</p>";return}
+  try{firebase.initializeApp(firebaseConfig);db=firebase.database()}catch(e){$("#app").innerHTML="<p>Couldn’t connect to Firebase. Check your config.</p>";return}
+  const c=ss.get("sw_code");if(c)watch(c);else draw();
+})();
+</script></body></html>
