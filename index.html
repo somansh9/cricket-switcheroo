@@ -141,6 +141,11 @@ async function patch(o){try{await ref.update(o)}catch(e){err="Couldn’t save: "
 function toReady(){patch({phase:"ready",base:setTime,hs:setHand,ready:{a:false,b:false}})}
 function imReady(){const s=seat();if(s)ref.child("ready/"+s).set(true).catch(e=>{err="Couldn’t save: "+(e.message||e.code||"error");draw()})}
 function changeRules(){patch({phase:"setup",ready:{a:false,b:false}})}
+function skipTurn(){
+  const s=seat();if(!G||G.phase!=="play"||G.turn!==s)return;
+  const g=structuredClone(G),d=draw1(g,s);sel=-1;word="";err="";
+  g.msg=g.names[s]+" skipped their turn"+(d?" and draws a card.":".");g.plays=1;advance(g);save(g);
+}
 function simHTML(p){return p&&p.sim&&p.sim.length?'<div style="margin-top:8px;color:var(--bad)">Heads up: similar to '+p.sim.map(x=>"“"+esc(x)+"”").join(", ")+', already used.</div>':""}
 function usedHTML(){const L=G.usedD||[];return '<div id="uw"><button id="un" style="padding:6px 12px;font-size:15px">Used names ('+L.length+(showUsed?") ▼":") ▲")+"</button>"+(showUsed?'<div class="ul">'+(L.length?L.map(x=>"<div>"+esc(x)+"</div>").join(""):"None yet.")+"</div>":"")+"</div>"}
 function advance(g){
@@ -208,7 +213,7 @@ function draw(){
     if(mine)h+='<div class="box">Waiting for '+esc(opp)+' to agree on “'+esc(pd.word)+"”…</div>";
     else h+='<div class="box"><b>'+esc(opp)+' says “'+esc(pd.word)+'”</b><br>Does this player fit <i>'+esc(subj)+"</i>, with a first name starting with <b>"+let_+'</b>?'+simHTML(pd)+'<div class="row" style="margin-top:10px"><button class="p" id="ag">Agree</button><button class="d" id="dg">Disagree</button></div></div>';
   }else if(mine){
-    h+='<div class="box"><b>Your turn.</b>'+(G.plays>1?" <i>Extra Turn: "+G.plays+" cards to play.</i>":"")+' Play a letter card to name a player who fits the subject, or a subject card to name a player whose first name starts with <b>'+G.letter+'</b>. Type their full name.'+hint()+'<input id="wd" placeholder="Player’s full name" value="'+esc(word)+'" autocomplete="off"><button class="p" id="go" style="width:100%">Play selected card</button><div class="err">'+esc(err)+"</div></div>";
+    h+='<div class="box"><b>Your turn.</b>'+(G.plays>1?" <i>Extra Turn: "+G.plays+" cards to play.</i>":"")+' Play a letter card to name a player who fits the subject, or a subject card to name a player whose first name starts with <b>'+G.letter+'</b>. Type their full name.'+hint()+'<input id="wd" placeholder="Player’s full name" value="'+esc(word)+'" autocomplete="off"><button class="p" id="go" style="width:100%">Play selected card</button><button id="sk" style="width:100%;margin-top:8px">Skip turn (draw 1 card)</button><div class="err">'+esc(err)+"</div></div>";
   }else h+='<div class="box">Waiting for '+esc(opp)+"…</div>";
   if(G.phase==="play")h+='<div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,mine);
   else if(G.phase==="judge")h+='<div style="position:relative"><div style="visibility:hidden"><div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,false)+'</div><div class="mut" style="position:absolute;inset:0;text-align:center;padding-top:8px">Hands are hidden while the name is checked.<br>They come back when the next turn starts.</div></div>';
@@ -222,6 +227,7 @@ function draw(){
   if($("#lv"))$("#lv").onclick=leave;
   if($("#rm"))$("#rm").onclick=rematch;
   if($("#un"))$("#un").onclick=()=>{showUsed=!showUsed;draw()};
+  if($("#sk"))$("#sk").onclick=skipTurn;
 }
 setInterval(()=>{
   const t=$("#tm");if(!G||G.phase!=="play"){if(t)t.textContent="";return}
