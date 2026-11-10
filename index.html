@@ -45,6 +45,12 @@ button:disabled{opacity:.5;cursor:default}
 #uw .ul{width:190px;max-height:50vh;overflow:auto;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 #uw .ul div{margin:2px 0}
 @media (min-width:900px){#uw{top:96px;bottom:auto;flex-direction:column}#uw .ul{max-height:70vh}}
+.tc{border:2px solid #d9534f;background:#ffd6d6;color:#7a1f1f;border-radius:999px;padding:3px 14px;font-weight:700;font-size:16px;line-height:1.3;white-space:nowrap}
+#tcd{display:none;position:fixed;top:12px;right:16px;z-index:30}
+.hh{display:flex;justify-content:space-between;align-items:center}
+@media (min-width:900px){#tcd{display:block}.tcm{display:none}}
+#tm{font-weight:700;font-size:20px}
+#tm.low{color:var(--bad)}
 </style></head>
 <body><div id="app"><p class="mut">Connecting…</p></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -58,8 +64,8 @@ apiKey: "AIzaSyDetNe_rxSH7oIVC6_FeQU4Lva8I7F0muc",
   projectId: "cricket-swit"
 };
 // =============================================================
-const SUBJ=["6,000+ Test runs","300+ Test wickets","A Test triple century","A Test hundred and a Test five-for","100+ Tests played","A Test hat-trick","A five-for on Test debut","Test batting average over 50 (3,000+ runs)","Test bowling average under 25 (100+ wickets)","2,000+ Test runs and 200+ Test wickets","A wicketkeeper with a Test hundred","An opener with 5,000+ Test runs","A left-arm spinner with 100+ Test wickets","Captained their country in 20+ Tests","7,000+ ODI runs","250+ ODI wickets","3,000+ ODI runs and 100+ ODI wickets","ODI batting average over 45 (3,000+ runs)","An ODI hat-trick","An ODI double century","3,000+ T20I runs","100+ T20I wickets","A T20I hundred","A five-wicket haul in a T20I","A wicketkeeper with 3,000+ ODI runs","A hundred in Tests, ODIs and T20Is","A woman with 100+ ODI caps","Played international cricket for two countries","A hundred in an ODI World Cup knockout match","A fifty in an ODI World Cup semi-final","A fifty in an ODI World Cup final","A fifty in a T20 World Cup semi-final","A fifty in a T20 World Cup final","A five-wicket haul at an ODI World Cup","A hat-trick at a World Cup (ODI or T20)","A century at a T20 World Cup","Player of the Match in a World Cup final","Player of the Tournament at a World Cup","Captained a World Cup-winning team (ODI or T20)","Captained a team in a T20 World Cup final","Played in a 2022 World Cup final (men’s or women’s)","Played in a 2023 World Cup final (men’s or women’s)","Played in a 2024 World Cup final (men’s or women’s)","Played in a World Test Championship final","Won an ICC Cricketer of the Year award","Won the IPL Orange Cap or Purple Cap","A Wisden Cricketer of the Year, 2014 to 2024","Non-Australian with a Test five-for in Australia","Non-Indian with a Test hundred in India","Non-South African with a Test five-for in South Africa","Non-Sri Lankan with a Test hundred in Sri Lanka","Non-West Indian with a Test hundred in the Caribbean","Non-New Zealander with a Test five-for in New Zealand","An English batter with a Test hundred in Australia","An Indian with a Test hundred in England","A Test double century","A Test hundred on debut","8,000+ Test runs","A ten-wicket haul in a Test match","A fast bowler with 200+ Test wickets","A spinner with 200+ Test wickets","A left-handed batter with 6,000+ Test runs","A Test hundred and 100+ Test wickets","10+ ODI hundreds","200+ ODIs played","A hundred at an ODI World Cup","2,000+ T20I runs","75+ T20I wickets","A Pakistani with a Test hundred","A Sri Lankan with a Test hundred","A New Zealander with a Test hundred","A South African with a Test hundred","A West Indian with a Test hundred","A Pakistani with a Test five-for","Non-Australian with a Test hundred in Australia","Non-English bowler with a Test five-for in England","An ICC Hall of Fame inductee","Played in the 2005 Ashes","An IPL hundred","An IPL five-wicket haul","A left-handed batter with a Test hundred in England","A left-handed batter with a Test hundred in Australia","A left-handed batter with a Test hundred in India","A right-handed batter with a Test hundred in the West Indies","A right-handed batter with a Test hundred in New Zealand","A left-arm bowler with a Test five-for in England","A left-arm bowler with a Test five-for in Australia","A left-arm spinner with a Test five-for in India","A right-arm spinner with a Test five-for in England","A right-arm seam bowler with a Test five-for in India"];
-const LET="AAAAAAAAAAAABBBBBBCCCCCCCDDDDDDDEEEEFFFGGGGGHHHHHIIIJJJJJJJJJKKKKKKKKLLLLLMMMMMMMMMMMMMMMNNNNNOOPPPPPQRRRRRRRRRSSSSSSSSSSSSSSTTTTTUUVVWWWYYZZ";
+const SUBJ=["6,000+ Test runs","300+ Test wickets","A Test triple century","A Test hundred and a Test five-for","75+ Tests played","A Test hat-trick","A five-for on Test debut","Test batting average over 50 (3,000+ runs)","Test bowling average under 25 (100+ wickets)","2,000+ Test runs and 200+ Test wickets","A wicketkeeper with a Test hundred","An opener with 5,000+ Test runs","A left-arm spinner with 100+ Test wickets","Captained their country in 20+ Tests","7,000+ ODI runs","200+ ODI wickets","3,000+ ODI runs and 100+ ODI wickets","ODI batting average over 45 (3,000+ runs)","An ODI hat-trick","An ODI double century","3,000+ T20 runs","100+ T20 wickets","A T20I hundred","A five-wicket haul in a T20I","A wicketkeeper with 2,000+ ODI runs","A hundred in Tests, ODIs and T20Is","A woman with 80+ ODI caps","Played international cricket for two countries","A hundred in an ODI World Cup knockout match","A fifty in an ODI World Cup semi-final","A fifty in an ODI World Cup final","A fifty in a T20 World Cup semi-final","A fifty in a T20 World Cup final","A five-wicket haul at an ODI World Cup","A hat-trick at a World Cup (ODI or T20)","A century at a T20 World Cup","Player of the Match in a World Cup final","Player of the Tournament at a World Cup","Captained a World Cup-winning team (ODI or T20)","Captained a team in a T20 World Cup final","Played in a 2022 World Cup final (men’s or women’s)","Played in a World Cup final since 2020","Played in a t20 World Cup final since 2024 (men’s or women’s)","Played in a World Test Championship final","Won the IPL Orange Cap or Purple Cap","Non-Australian with a Test five-for in Australia","Non-Indian with a Test hundred in India","Non-South African with a Test five-for in South Africa","Non-Sri Lankan with a Test hundred in Sri Lanka","Non-West Indian with a Test hundred in the Caribbean","Non-New Zealander with a Test five-for in New Zealand","An English batter with a Test hundred in Australia","An Indian with a Test hundred in England","A Test double century","A Test hundred on debut","8,000+ Test runs","A ten-wicket haul in a Test match","A fast bowler with 200+ Test wickets","A spinner with 200+ Test wickets","A left-handed batter with 6,000+ Test runs","A Test hundred and 100+ Test wickets","10+ ODI hundreds","200+ ODIs played","A hundred at an ODI World Cup","2,000+ T20I runs","75+ T20I wickets","A Pakistani with a Test hundred","A Sri Lankan with a Test hundred","A New Zealander with a Test hundred","A South African with a Test hundred","A West Indian with a Test hundred","A Pakistani with a Test five-for","Non-Australian with a Test hundred in Australia","Non-English bowler with a Test five-for in England","An ICC Hall of Fame inductee","Played in the 2005 Ashes","An IPL hundred","An IPL five-wicket haul","A left-handed batter with a Test hundred in England","A left-handed batter with a Test hundred in Australia","A left-handed batter with a Test hundred in India","A right-handed batter with a Test hundred in the West Indies","A right-handed batter with a Test hundred in New Zealand","A left-arm bowler with a Test five-for in England","A left-arm bowler with a Test five-for","A spin bowler with a Test five-for in India","A right-arm bowler with a Test five-for in England","A right-arm seam bowler with a Test five-for in India"];
+const LET="AAAAAAAAAAAAABBBBBBCCCCCCCDDDDDDDEEEFFFGGGGGHHHHHIIIJJJJJJJJJJKKKKKKKKLLLLLMMMMMMMMMMMMMMMNNNNNOOPPPPPQRRRRRRRRRSSSSSSSSSSSSSSTTTTTUUVVWWWYYZ";
 const TIME=30;
 const WN={EXTRA:"Extra Turn",TIME:"More Time",SWITCH:"Big Switch"};
 const WD={EXTRA:"Extra Turn: play two cards this turn.",TIME:"More Time: you get double the time for this card.",SWITCH:"Big Switch: swap hands with your opponent. Your turn then ends."};
@@ -75,7 +81,7 @@ const other=s=>s==="a"?"b":"a";
 function fresh(n=10){
   const d=shuffle([...SUBJ.map(v=>({t:"S",v})),...LET.split("").map(v=>({t:"L",v})),...["EXTRA","EXTRA","TIME","TIME","SWITCH"].map(v=>({t:"W",v}))]);
   const s=d.splice(d.findIndex(c=>c.t==="S"),1)[0],l=d.splice(d.findIndex(c=>c.t==="L"),1)[0];
-  return {names:{a:name,b:""},ids:{a:me,b:""},hands:{a:d.splice(0,n),b:d.splice(0,n)},deck:d,subj:s.v,letter:l.v,used:[],usedD:[],turn:"a",phase:"wait",pending:null,turnStart:Date.now(),winner:"",msg:"",plays:1,limit:TIME,wild:false,score:{a:0,b:0},round:1,first:"a"};
+  return {names:{a:name,b:""},ids:{a:me,b:""},hands:{a:d.splice(0,n),b:d.splice(0,n)},deck:d,subj:s.v,letter:l.v,used:[],usedD:[],turn:"a",phase:"wait",pending:null,turnStart:Date.now(),winner:"",msg:"",plays:1,limit:TIME,wild:false,score:{a:0,b:0},round:1,first:"a",turnNo:1};
 }
 async function save(g){try{await ref.set(g)}catch(e){err="Couldn’t save: "+(e.message||e.code||"error");draw()}}
 function norm(g){if(!g)return null;g.used=g.used||[];g.usedD=g.usedD||[];g.deck=g.deck||[];g.hands=g.hands||{};g.hands.a=g.hands.a||[];g.hands.b=g.hands.b||[];return g}
@@ -116,7 +122,7 @@ function judge(ok){
     H.splice(i,1);g.used.push(p.norm);g.usedD.push(p.word);
     if(p.card.t==="L")g.letter=p.card.v;else g.subj=p.card.v;
     g.msg=g.names[s]+" played “"+p.word+"”. Accepted!";
-    if(!H.length){finish(g,s);return save(g)}}else{
+    if(!H.length){g.pending=null;g.phase="play";settle(g,s);return save(g)}}else{
     const d=draw1(g,s);g.msg=g.names[s]+"’s “"+p.word+"” was rejected"+(d?" and they draw a card.":".");
   }
   g.pending=null;g.phase="play";advance(g);save(g);
@@ -129,7 +135,19 @@ function startGame(){
   const g=fresh(G.hs||10);g.names=G.names;g.ids=G.ids;g.base=G.base||TIME;g.limit=g.base;g.hs=G.hs||10;
   g.phase="play";g.turnStart=Date.now();g.msg="Game on! "+g.names.a+" goes first.";save(g);
 }
-function finish(g,w){g.phase="over";g.winner=w;g.pending=null;g.score=g.score||{a:0,b:0};g.score[w]=(g.score[w]||0)+1}
+function finish(g,w){g.phase="over";g.winner=w;g.pending=null;g.score=g.score||{a:0,b:0};if(w==="d"){g.score.a=(g.score.a||0)+.5;g.score.b=(g.score.b||0)+.5}else g.score[w]=(g.score[w]||0)+1}
+function pass(g){g.turn=other(g.turn);g.plays=1;g.wild=false;if(g.turn===(g.first||"a"))g.turnNo=(g.turnNo||1)+1}
+function settle(g,p){
+  const S=g.first||"a",o=other(p),pe=!g.hands[p].length,oe=!g.hands[o].length;
+  if(!pe&&!oe)return false;
+  if(oe&&!pe){finish(g,o);return true}
+  if(p===S){
+    if(g.hands[o].length>3){finish(g,p);return true}
+    g.fin=S;g.turn=o;g.plays=1;g.wild=false;g.limit=g.base||TIME;g.turnStart=Date.now();
+    g.msg=g.names[S]+" is out of cards! "+g.names[o]+" gets one last turn.";return true;
+  }
+  finish(g,g.fin===S?"d":p);return true;
+}
 function rematch(){
   if(G.phase!=="over")return;
   const g=fresh(G.hs||10);g.names=G.names;g.ids=G.ids;g.base=G.base;g.limit=G.base||TIME;g.hs=G.hs;
@@ -150,17 +168,18 @@ function simHTML(p){return p&&p.sim&&p.sim.length?'<div style="margin-top:8px;co
 function usedHTML(){const L=G.usedD||[];return '<div id="uw"><button id="un" style="padding:6px 12px;font-size:15px">Used names ('+L.length+(showUsed?") ▼":") ▲")+"</button>"+(showUsed?'<div class="ul">'+(L.length?L.map(x=>"<div>"+esc(x)+"</div>").join(""):"None yet.")+"</div>":"")+"</div>"}
 function advance(g){
   const cur=g.turn;g.plays=(g.plays||1)-1;g.limit=g.base||TIME;g.turnStart=Date.now();
-  if(g.plays<=0){g.turn=other(cur);g.plays=1;g.wild=false}
+  if(g.plays<=0){if(g.fin&&cur!==g.fin){finish(g,g.fin);return}pass(g)}
   else g.msg+=" "+g.names[cur]+" plays again.";
 }
 function wild(s,c){
   if(G.wild){err="Only one Wild Card per turn";return draw()}
+  if(c.v==="SWITCH"&&!G.hands[other(s)].length){err="You can’t swap with an empty hand";return draw()}
   const g=structuredClone(G),o=other(s),n=g.names[s];
   g.hands[s].splice(sel,1);g.wild=true;g.turnStart=Date.now();err="";sel=-1;word="";
   if(c.v==="EXTRA"){g.plays=2;g.msg=n+" played Extra Turn and gets two cards this turn."}
   else if(c.v==="TIME"){const b=g.base||TIME;g.limit=(g.limit||b)+b;g.turnStart=G.turnStart;g.msg=n+" played More Time: +"+b+" seconds."}
-  else{[g.hands[s],g.hands[o]]=[g.hands[o],g.hands[s]];g.msg=n+" played the Big Switch and swapped hands!";g.turn=o;g.plays=1;g.wild=false;g.limit=g.base||TIME}
-  for(const x of["a","b"])if(!g.hands[x].length&&g.phase!=="over"){finish(g,x)}
+  else{[g.hands[s],g.hands[o]]=[g.hands[o],g.hands[s]];g.msg=n+" played the Big Switch and swapped hands!";g.limit=g.base||TIME;pass(g)}
+  settle(g,s);
   save(g);
 }
 function hint(){const c=G.hands[seat()][sel];return c&&c.t==="W"?"<br><b>"+WD[c.v]+"</b> No word needed, just press Play.<br>":""}
@@ -201,22 +220,22 @@ function draw(){
     return;
   }
   const o=other(s),mine=G.turn===s,opp=G.names[o];
-  let h='<div class="bar"><span>Game <b>'+esc(code)+'</b></span><span>'+esc(opp)+": "+G.hands[o].length+' cards</span><span id="tm"></span></div>';
+  let h='<div class="bar"><span>Game <b>'+esc(code)+'</b></span><span>'+esc(opp)+": "+G.hands[o].length+' cards</span><span id="tm"></span></div><div id="tcd" class="tc">Turn '+(G.turnNo||1)+'</div>';
   h+=scoreLine();const pd=G.phase==="judge"?G.pending:null;
   const subj=pd&&pd.card.t==="S"?pd.card.v:G.subj,let_=pd&&pd.card.t==="L"?pd.card.v:G.letter;
   h+='<div class="table"><div class="c S big"><small>Subject</small><span>'+esc(subj)+'</span></div><div class="c L big"><small>Letter</small><b>'+let_+"</b></div></div>";
   if(pd)h+='<p class="msg mut">Proposed by '+esc(G.names[G.turn])+" — not yet accepted</p>";
   else h+='<p class="msg mut">'+esc(G.msg)+"</p>";
   if(G.phase==="over"){
-    h+='<div class="box" style="text-align:center"><h2>'+(G.winner===s?"🎉 You win!":esc(G.names[G.winner])+" wins")+'</h2><div class="row"><button class="p" id="rm">Play again</button><button id="lv">Leave room</button></div></div>';
+    h+='<div class="box" style="text-align:center"><h2>'+(G.winner==="d"?"It’s a draw: half a point each":G.winner===s?"🎉 You win!":esc(G.names[G.winner])+" wins")+'</h2><div class="row"><button class="p" id="rm">Play again</button><button id="lv">Leave room</button></div></div>';
   }else if(G.phase==="judge"){
     if(mine)h+='<div class="box">Waiting for '+esc(opp)+' to agree on “'+esc(pd.word)+"”…</div>";
     else h+='<div class="box"><b>'+esc(opp)+' says “'+esc(pd.word)+'”</b><br>Does this player fit <i>'+esc(subj)+"</i>, with a first name starting with <b>"+let_+'</b>?'+simHTML(pd)+'<div class="row" style="margin-top:10px"><button class="p" id="ag">Agree</button><button class="d" id="dg">Disagree</button></div></div>';
   }else if(mine){
     h+='<div class="box"><b>Your turn.</b>'+(G.plays>1?" <i>Extra Turn: "+G.plays+" cards to play.</i>":"")+' Play a letter card to name a player who fits the subject, or a subject card to name a player whose first name starts with <b>'+G.letter+'</b>. Type their full name.'+hint()+'<input id="wd" placeholder="Player’s full name" value="'+esc(word)+'" autocomplete="off"><button class="p" id="go" style="width:100%">Play selected card</button><button id="sk" style="width:100%;margin-top:8px">Skip turn (draw 1 card)</button><div class="err">'+esc(err)+"</div></div>";
   }else h+='<div class="box">Waiting for '+esc(opp)+"…</div>";
-  if(G.phase==="play")h+='<div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,mine);
-  else if(G.phase==="judge")h+='<div style="position:relative"><div style="visibility:hidden"><div class="mut">Your hand ('+G.hands[s].length+")</div>"+handHTML(s,false)+'</div><div class="mut" style="position:absolute;inset:0;text-align:center;padding-top:8px">Hands are hidden while the name is checked.<br>They come back when the next turn starts.</div></div>';
+  if(G.phase==="play")h+='<div class="hh"><span class="mut">Your hand ('+G.hands[s].length+')</span><span class="tc tcm">Turn '+(G.turnNo||1)+"</span></div>"+handHTML(s,mine);
+  else if(G.phase==="judge")h+='<div class="hh"><span class="mut" style="visibility:hidden">Your hand ('+G.hands[s].length+')</span><span class="tc tcm">Turn '+(G.turnNo||1)+'</span></div><div style="position:relative"><div style="visibility:hidden">'+handHTML(s,false)+'</div><div class="mut" style="position:absolute;inset:0;text-align:center;padding-top:8px">Hands are hidden while the name is checked.<br>They come back when the next turn starts.</div></div>';
   h+=usedHTML()+'<div style="height:52px"></div>';
   a.innerHTML=h;
   a.querySelectorAll(".hand button").forEach(b=>b.onclick=()=>{sel=+b.dataset.i;err="";draw();const w=$("#wd");if(w)w.focus()});
@@ -232,7 +251,7 @@ function draw(){
 setInterval(()=>{
   const t=$("#tm");if(!G||G.phase!=="play"){if(t)t.textContent="";return}
   const left=(G.limit||TIME)-(Date.now()-G.turnStart)/1000;
-  if(t)t.textContent="⏱ "+Math.max(0,Math.ceil(left))+"s";
+  if(t){t.textContent="⏱ "+Math.max(0,Math.ceil(left))+"s";t.classList.toggle("low",left<=5)}
   if(left<-2&&seat()&&seat()!==G.turn&&sentTO!==G.turnStart){sentTO=G.turnStart;timeout()}
 },250);
 (function(){
