@@ -44,15 +44,17 @@ button:disabled{opacity:.5;cursor:default}
 #uw{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:6px}
 #uw .ul{width:190px;max-height:50vh;overflow:auto;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 #uw .ul div{margin:2px 0}
-@media (min-width:900px){#uw{top:96px;bottom:auto;flex-direction:column}#uw .ul{max-height:70vh}}
-.tc{border:2px solid #d9534f;background:#ffd6d6;color:#7a1f1f;border-radius:999px;padding:3px 14px;font-weight:700;font-size:16px;line-height:1.3;white-space:nowrap}
+@media (min-width:900px){#uw{top:12px;bottom:auto;flex-direction:column}#uw .ul{max-height:70vh}#uw #un{height:34px}}
+.tc{border:2px solid #9b8bd6;background:#e6e6fa;color:#3b2f6b;border-radius:999px;padding:3px 14px;font-weight:700;font-size:16px;line-height:1.3;white-space:nowrap}
 #tcd{display:none;position:fixed;top:12px;right:16px;z-index:30}
 .hh{display:flex;justify-content:space-between;align-items:center}
-@media (min-width:900px){#tcd{display:block}.tcm{display:none}}
+@media (min-width:900px){#tcd{display:flex;align-items:center;height:34px;box-sizing:border-box}.tcm{display:none}}
 #tm{font-weight:700;font-size:20px}
 #tm.low{color:var(--bad)}
+body.lobby.rules{background:#cfe8ff;color:#1c1b19;--mut:#3b4a5e}
 </style></head>
 <body><div id="app"><p class="mut">Connecting…</p></div>
+<div id="rulestext" style="display:none">UPDATE DA RULES</div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
@@ -73,7 +75,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ss={get:k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{sessionStorage.setItem(k,v)}catch(e){}}};
 let db,ref,G=null,code="",me=ss.get("sw_id")||(Math.random().toString(36).slice(2)+Date.now().toString(36));ss.set("sw_id",me);
-let sel=-1,word="",err="",name=ss.get("sw_name")||"",unsub=null,sentTO=0,setTime=TIME,setHand=10,showUsed=false,startKey="";
+let sel=-1,word="",err="",name=ss.get("sw_name")||"",unsub=null,sentTO=0,setTime=TIME,setHand=10,showUsed=false,startKey="",showRules=false;
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function seat(){return !G?null:G.ids.a===me?"a":G.ids.b===me?"b":null}
@@ -164,6 +166,10 @@ function skipTurn(){
   const g=structuredClone(G),d=draw1(g,s);sel=-1;word="";err="";
   g.msg=g.names[s]+" skipped their turn"+(d?" and draws a card.":".");g.plays=1;advance(g);save(g);
 }
+function rulesPage(a){
+  a.innerHTML='<h1 style="text-align:center">Rules</h1><div class="box" style="color:var(--ink)">'+$("#rulestext").innerHTML+'</div><button id="rb" style="width:100%;margin-top:14px">Back</button>';
+  $("#rb").onclick=()=>{showRules=false;draw()};
+}
 function simHTML(p){return p&&p.sim&&p.sim.length?'<div style="margin-top:8px;color:var(--bad)">Heads up: similar to '+p.sim.map(x=>"“"+esc(x)+"”").join(", ")+', already used.</div>':""}
 function usedHTML(){const L=G.usedD||[];return '<div id="uw"><button id="un" style="padding:6px 12px;font-size:15px">Used names ('+L.length+(showUsed?") ▼":") ▲")+"</button>"+(showUsed?'<div class="ul">'+(L.length?L.map(x=>"<div>"+esc(x)+"</div>").join(""):"None yet.")+"</div>":"")+"</div>"}
 function advance(g){
@@ -187,13 +193,13 @@ function handHTML(s,active){
   return '<div class="hand">'+G.hands[s].map((c,i)=>'<button class="c '+c.t+(i===sel?" sel":"")+'" data-i="'+i+'"'+(active?"":" disabled")+'>'+(c.t==="L"?"<b>"+c.v+"</b>":c.t==="W"?"<small>Wild</small><span>"+WN[c.v]+"</span>":esc(c.v))+'</button>').join("")+"</div>";
 }
 function draw(){
-  const a=$("#app");document.body.classList.toggle("lobby",!G||G.phase==="wait"||G.phase==="setup"||G.phase==="ready");if(G&&seat()&&sel>=G.hands[seat()].length)sel=-1;
+  const a=$("#app");document.body.classList.toggle("lobby",!G||G.phase==="wait"||G.phase==="setup"||G.phase==="ready");if(G&&seat()&&sel>=G.hands[seat()].length)sel=-1;document.body.classList.toggle("rules",!G&&showRules);if(!G&&showRules)return rulesPage(a);
   if(!G){
     a.innerHTML='<h1 style="text-align:center">🏏Cricket Switcheroo🏏</h1>'
     +'<input id="nm" placeholder="Your name" value="'+esc(name)+'" maxlength="16">'
     +'<button class="p" id="mk" style="width:100%;margin:6px 0">Create a new game</button>'
     +'<p class="mut" style="text-align:center">or join a game</p><div class="row"><input id="cd" placeholder="Code" maxlength="4" style="text-transform:uppercase"><button id="jn">Join</button></div><div class="err">'+esc(err)+"</div>";
-    $("#mk").onclick=create;$("#jn").onclick=join;return;
+    a.insertAdjacentHTML("beforeend",'<button id="rl" style="width:100%;margin-top:4px;background:#cfe8ff;border-color:#9cc6ee;font-weight:600">Rules</button>');$("#rl").onclick=()=>{showRules=true;draw()};$("#mk").onclick=create;$("#jn").onclick=join;return;
   }
   const s=seat();
   if(!s){a.innerHTML='<p>This game already has two players.</p><button id="lv">Back</button>';$("#lv").onclick=leave;return}
